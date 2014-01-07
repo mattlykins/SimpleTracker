@@ -11,7 +11,7 @@ public class KeypadAdapter extends BaseAdapter {
     private OnClickListener mOnButtonClick;
 
     private KeypadButton[] mButtons = { 
-            KeypadButton.DUMMY,KeypadButton.BACKSPACE, KeypadButton.CE, KeypadButton.C,
+            KeypadButton.DUMMY,KeypadButton.DUMMY, KeypadButton.BACKSPACE, KeypadButton.C,
             KeypadButton.SEVEN,KeypadButton.EIGHT,KeypadButton.NINE,KeypadButton.DIV,            
             KeypadButton.FOUR,KeypadButton.FIVE,KeypadButton.SIX, KeypadButton.MULTIPLY,           
             KeypadButton.ONE,KeypadButton.TWO,KeypadButton.THREE,KeypadButton.MINUS,

@@ -99,18 +99,22 @@ public class MainActivity extends Activity {
                     tvInput.setText(currentInput.subSequence(0, endIndex));
                 }
                 break;
-            case CE: // Handle clear input
-                tvInput.setText("0");
-                break;
+//            case CE: // Handle clear input
+//                tvInput.setText("0");
+//                break;
             case C: // Handle clear input and stack
                 tvInput.setText("0");
+                stackInput.clear();
+                operatorSet = false;
                 break;
             case DECIMAL_SEP: // Handle decimal seperator
                 if (tvInput.equals("0")) {
                     tvInput.setText("0" + decimalSeparator);
                 }
-                else if (currentInput.contains("."))
+                else if (countOccurrences(currentInput,decimalSeparator.charAt(0)) > 1)
+                {
                     return;
+                }
                 else
                     tvInput.append(decimalSeparator);
                 break;
@@ -131,12 +135,15 @@ public class MainActivity extends Activity {
                     String stackString = stackInput.get(0)+stackInput.get(1);
                     String secondInput = tvInput.getText().subSequence(stackString.length(), tvInput.length()).toString();
                     
-                    //Toast.makeText(this, secondInput, Toast.LENGTH_SHORT).show();
                     
-                    stackInput.add(secondInput);                
-                    Toasty(String.valueOf(stackInput.size()));
-                    EvaluateStack();
-                    emptyStack();
+                    if( countOccurrences(stackString,decimalSeparator.charAt(0)) < 2 &&
+                            countOccurrences(secondInput,decimalSeparator.charAt(0)) < 2 ){
+                        
+                        stackInput.add(secondInput);                
+                        //Toasty(String.valueOf(stackInput.size()));
+                        EvaluateStack();
+                        emptyStack();
+                    }
                 }
                 break;
             default:
@@ -153,6 +160,7 @@ public class MainActivity extends Activity {
     }
     
     
+    @SuppressWarnings("unused")
     private void Toasty(String say){        
         Toast.makeText(this, say, Toast.LENGTH_SHORT).show();
     }
@@ -188,6 +196,18 @@ public class MainActivity extends Activity {
         stackInput.clear();
     }
     
+    //Count the number of times a character appears within a string
+    private int countOccurrences(String text,char character){
+        int occurr = 0;
+        
+        for(int i = 0; i < text.length(); i++){
+            if( text.charAt(i) == character ){
+                occurr++;
+            }
+        }        
+        return occurr;
+    }
+    
     // Return the String of a Long if possible, otherwise the String of a double
     private String doubleOrLong(double value){
         if (Double.isNaN(value) || Double.isInfinite(value))
@@ -198,7 +218,8 @@ public class MainActivity extends Activity {
             return Long.toString(longValue);
         }
         else{
-            return Double.toString(value);
+            //This will round to the nearest 0.1
+            return String.format("%.1f",value);
         }
     }
 }
