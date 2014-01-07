@@ -1,22 +1,204 @@
 package com.mattlykins.simpletracker;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.util.Stack;
+
+
 import android.os.Bundle;
 import android.app.Activity;
-import android.view.Menu;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.GridView;
+import android.widget.TextView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.Toast;
 
 public class MainActivity extends Activity {
+
+    GridView gvKeypad;
+    TextView tvInput;
+
+    Stack<String> stackInput;
+
+    KeypadAdapter kaKeypad;
+
+    String decimalSeparator;
+    
+    
+    // Identifies whether a mathematical operation has been added to the stack
+    boolean operatorSet = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        DecimalFormat currencyFormatter = (DecimalFormat) NumberFormat.getInstance();
+        char decimalSeperator = currencyFormatter.getDecimalFormatSymbols().getDecimalSeparator();
+        decimalSeparator = Character.toString(decimalSeperator);
+
+        // Create the stack
+        stackInput = new Stack<String>();
+
+        // Get reference to the keypad button GridView
+        gvKeypad = (GridView) findViewById(R.id.grdButtons);
+
+        // Get reference to the user input TextView
+        tvInput = (TextView) findViewById(R.id.txtInput);
+        tvInput.setText("0");
+
+        // Create Keypad Adapter
+        kaKeypad = new KeypadAdapter(this);
+
+        // Set adapter of the keypad grid
+        gvKeypad.setAdapter(kaKeypad);
+
+        // Set button click listener of the keypad adapter
+        kaKeypad.setOnButtonClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Button btn = (Button) v;
+                // Get the KeypadButton value which is used to identify the
+                // keypad button from the Button's tag
+                KeypadButton keypadButton = (KeypadButton) btn.getTag();
+
+                // Process keypad button
+                ProcessKeypadInput(keypadButton);
+            }
+        });
+
+        gvKeypad.setOnItemClickListener(new OnItemClickListener() {
+            public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
+
+            }
+        });
+
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
-    }
+    private void ProcessKeypadInput(KeypadButton keypadButton) {
+        //Toast.makeText(this, keypadButton.getText(),Toast.LENGTH_SHORT).show();
+        
+        String keyText = keypadButton.getText().toString();
+        String currentInput = tvInput.getText().toString();        
 
+        int currentInputLen = currentInput.length();
+
+        switch (keypadButton) {
+            case BACKSPACE:
+
+                int endIndex = currentInputLen - 1;
+
+                // There is one character at input so reset input to 0
+                if (endIndex < 1) {
+                    tvInput.setText("0");
+                }
+                // Trim last character of the input text
+                else {
+                    tvInput.setText(currentInput.subSequence(0, endIndex));
+                }
+                break;
+            case CE: // Handle clear input
+                tvInput.setText("0");
+                break;
+            case C: // Handle clear input and stack
+                tvInput.setText("0");
+                break;
+            case DECIMAL_SEP: // Handle decimal seperator
+                if (tvInput.equals("0")) {
+                    tvInput.setText("0" + decimalSeparator);
+                }
+                else if (currentInput.contains("."))
+                    return;
+                else
+                    tvInput.append(decimalSeparator);
+                break;
+            case DIV:
+            case PLUS:
+            case MINUS:
+            case MULTIPLY:
+                if(!currentInput.equals("0") && !operatorSet)
+                {                
+                    tvInput.append(keyText);
+                    stackInput.add(currentInput);
+                    stackInput.add(keyText);
+                }
+                operatorSet = true;
+                break;
+            case CALCULATE:
+                if( stackInput.size() == 2 ){
+                    String stackString = stackInput.get(0)+stackInput.get(1);
+                    String secondInput = tvInput.getText().subSequence(stackString.length(), tvInput.length()).toString();
+                    
+                    //Toast.makeText(this, secondInput, Toast.LENGTH_SHORT).show();
+                    
+                    stackInput.add(secondInput);                
+                    Toasty(String.valueOf(stackInput.size()));
+                    EvaluateStack();
+                    emptyStack();
+                }
+                break;
+            default:
+                if (Character.isDigit(keyText.charAt(0))) {
+                    if (currentInput.equals("0")){
+                        tvInput.setText(keyText);
+                    }
+                    else{
+                        tvInput.append(keyText);
+                    }
+                }
+                break;
+        }
+    }
+    
+    
+    private void Toasty(String say){        
+        Toast.makeText(this, say, Toast.LENGTH_SHORT).show();
+    }
+    
+    private void EvaluateStack(){
+        if( operatorSet && stackInput.size() == 3 ){
+            double firstNum = Double.valueOf(stackInput.get(0));
+            String operation = stackInput.get(1);
+            double secondNum = Double.valueOf(stackInput.get(2));
+            
+            double result = Double.NaN;            
+            
+            if(operation.equals(KeypadButton.DIV.getText())){
+                result = firstNum/secondNum;                                
+            }
+            else if( operation.equals(KeypadButton.MULTIPLY.getText())){
+                result = firstNum*secondNum;
+            }
+            else if( operation.equals(KeypadButton.PLUS.getText())){
+                result = firstNum+secondNum;
+            }
+            else if( operation.equals(KeypadButton.MINUS.getText())){
+                result = firstNum-secondNum;                
+            }
+            
+            tvInput.setText(doubleOrLong(result));
+            operatorSet = false;            
+        }
+        
+    }
+    
+    private void emptyStack(){
+        stackInput.clear();
+    }
+    
+    // Return the String of a Long if possible, otherwise the String of a double
+    private String doubleOrLong(double value){
+        if (Double.isNaN(value) || Double.isInfinite(value))
+            return null;
+        
+        long longValue = (long)value;
+        if (value == longValue){
+            return Long.toString(longValue);
+        }
+        else{
+            return Double.toString(value);
+        }
+    }
 }
