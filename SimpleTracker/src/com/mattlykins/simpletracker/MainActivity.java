@@ -76,7 +76,8 @@ public class MainActivity extends Activity {
         });
 
     }
-
+    
+    //Handle all of the button presses on the grid view keypad
     private void ProcessKeypadInput(KeypadButton keypadButton) {
         //Toast.makeText(this, keypadButton.getText(),Toast.LENGTH_SHORT).show();
         
@@ -159,12 +160,13 @@ public class MainActivity extends Activity {
         }
     }
     
-    
+    // Display a toast for quick debugging
     @SuppressWarnings("unused")
     private void Toasty(String say){        
         Toast.makeText(this, say, Toast.LENGTH_SHORT).show();
     }
     
+    // Evaluate the single operation that is stored in the stack
     private void EvaluateStack(){
         if( operatorSet && stackInput.size() == 3 ){
             double firstNum = Double.valueOf(stackInput.get(0));
@@ -192,6 +194,8 @@ public class MainActivity extends Activity {
         
     }
     
+    
+    //Clear operation stack. Should be called after calculating and on a clear
     private void emptyStack(){
         stackInput.clear();
     }
