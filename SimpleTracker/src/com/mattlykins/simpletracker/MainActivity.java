@@ -12,21 +12,25 @@ import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.GridView;
+import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Toast;
+
+import com.mattlykins.database.*;
 
 public class MainActivity extends Activity {
 
     GridView gvKeypad;
     TextView tvInput;
+    
+    SimpleTrackerDbAdapter mDbHelper;
 
     Stack<String> stackInput;
 
     KeypadAdapter kaKeypad;
 
-    String decimalSeparator;
-    
+    String decimalSeparator; 
     
     // Identifies whether a mathematical operation has been added to the stack
     boolean operatorSet = false;
@@ -35,6 +39,8 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        
+        mDbHelper = new SimpleTrackerDbAdapter(this);
         DecimalFormat currencyFormatter = (DecimalFormat) NumberFormat.getInstance();
         char decimalSeperator = currencyFormatter.getDecimalFormatSymbols().getDecimalSeparator();
         decimalSeparator = Character.toString(decimalSeperator);
