@@ -1,6 +1,7 @@
 package com.mattlykins.simpletracker;
 
 public enum KeypadButton {
+    STORE("STORE", KeypadButtonCategory.OTHER),
     BACKSPACE("<-", KeypadButtonCategory.CLEAR),
     CE("CE", KeypadButtonCategory.CLEAR),
     C("CLEAR", KeypadButtonCategory.CLEAR),

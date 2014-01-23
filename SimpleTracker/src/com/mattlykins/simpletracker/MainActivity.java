@@ -2,6 +2,7 @@ package com.mattlykins.simpletracker;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.Date;
 import java.util.Stack;
 
 
@@ -18,6 +19,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Toast;
 
 import com.mattlykins.database.*;
+import com.mattlykins.datetime.*;
 
 public class MainActivity extends Activity {
 
@@ -41,6 +43,7 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
         
         mDbHelper = new SimpleTrackerDbAdapter(this);
+        mDbHelper.open();
         DecimalFormat currencyFormatter = (DecimalFormat) NumberFormat.getInstance();
         char decimalSeperator = currencyFormatter.getDecimalFormatSymbols().getDecimalSeparator();
         decimalSeparator = Character.toString(decimalSeperator);
@@ -48,17 +51,13 @@ public class MainActivity extends Activity {
         // Create the stack
         stackInput = new Stack<String>();
 
-        // Get reference to the keypad button GridView
-        gvKeypad = (GridView) findViewById(R.id.grdButtons);
-
-        // Get reference to the user input TextView
+        
+        gvKeypad = (GridView) findViewById(R.id.grdButtons);        
         tvInput = (TextView) findViewById(R.id.txtInput);
         tvInput.setText("0");
 
-        // Create Keypad Adapter
-        kaKeypad = new KeypadAdapter(this);
-
-        // Set adapter of the keypad grid
+        
+        kaKeypad = new KeypadAdapter(this);       
         gvKeypad.setAdapter(kaKeypad);
 
         // Set button click listener of the keypad adapter
@@ -93,6 +92,14 @@ public class MainActivity extends Activity {
         int currentInputLen = currentInput.length();
 
         switch (keypadButton) {
+            case STORE:
+                DateString ds = new DateString();                
+                Date currentDate = new Date();
+                String parsedDate = ds.dateToString(currentDate);
+                
+                mDbHelper.saveEntry(currentInput, parsedDate);
+                
+                break;
             case BACKSPACE:
 
                 int endIndex = currentInputLen - 1;
